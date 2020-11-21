@@ -9,7 +9,7 @@ interface ParamTypes {
     id: string
 }
 
-export default function Detail(props) {
+export default function Detail(props:any) {
   const params = useParams();
   const skuRef = useRef();
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ export default function Detail(props) {
 
       <select id="size" ref={skuRef}>
         <option value="">What size?</option>
-        {product.skus.map((s) => (
+        {product.skus.map((s:any) => (
           <option key={s.sku} value={s.sku}>
             {s.size}
           </option>

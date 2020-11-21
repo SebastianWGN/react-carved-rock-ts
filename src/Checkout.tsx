@@ -1,3 +1,4 @@
+  
 import React, { useState } from "react";
 import { saveShippingAddress } from "./services/shippingService";
 
@@ -8,24 +9,43 @@ const STATUS = {
   COMPLETED: "COMPLETED",
 };
 
+
+interface CartItm{
+  id: string
+  sku: string
+  quantity: number
+}
+
+interface Address{
+  id: number
+  city: string
+  country: string
+}
+
+interface IProps{
+  cart: Array<CartItm>
+  emptyCart: () => void
+}
+
 // Declaring outside component to avoid recreation on each render
-const emptyAddress = {
+const emptyAddress: Address = {
+  id: 0,
   city: "",
   country: "",
 };
 
 
-export default function Checkout({ cart, emptyCart }) {
-  const [address, setAddress] = useState(emptyAddress);
+export default function Checkout({ cart, emptyCart }: IProps) {
+  const [address, setAddress] = useState<Address>(emptyAddress);
   const [status, setStatus] = useState(STATUS.IDLE);
   const [saveError, setSaveError] = useState(null);
-  const [touched, setTouched] = useState({});
+  const [touched, setTouched] = useState<Address>(emptyAddress);
 
   // Derived state
-  const errors = getErrors(address);
+  const errors:any = getErrors(address);
   const isValid = Object.keys(errors).length === 0;
 
-  function handleChange(e) {
+  function handleChangeInput(e: React.ChangeEvent<HTMLInputElement>) {
     e.persist(); // persist the event
     setAddress((curAddress) => {
       return {
@@ -35,23 +55,45 @@ export default function Checkout({ cart, emptyCart }) {
     });
   }
 
-  function handleBlur(event) {
+  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    e.persist(); // persist the event
+    setAddress((curAddress) => {
+      return {
+        ...curAddress,
+        [e.target.id]: e.target.value,
+      };
+    });
+  }
+
+  
+  function handleBlur(event: React.FocusEvent<HTMLSelectElement>) {
     event.persist();
     setTouched((cur) => {
       return { ...cur, [event.target.id]: true };
     });
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setStatus(STATUS.SUBMITTING);
-    await saveShippingAddress(address);
-    emptyCart();
-    setStatus(STATUS.COMPLETED)
+  function handleBlurInput(event: React.FocusEvent<HTMLInputElement>) {
+    event.persist();
+    setTouched((cur) => {
+      return { ...cur, [event.target.id]: true };
+    });
   }
 
-  function getErrors(address) {
-    const result = {city: "", country: ""};
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStatus(STATUS.SUBMITTING);
+    try {
+      await saveShippingAddress(address);
+      emptyCart();
+      setStatus(STATUS.COMPLETED);
+    } catch (e) {
+      setSaveError(e);
+    }
+  }
+
+  function getErrors(address: Address) {
+    const result : Address = { id:0, city: "", country: ""};
     if (!address.city) result.city = "City is required";
     if (!address.country) result.country = "Country is required";
     return result;
@@ -64,7 +106,17 @@ export default function Checkout({ cart, emptyCart }) {
 
   return (
     <>
-      
+      <h1>Shipping Info</h1>
+      {!isValid && status === STATUS.SUBMITTED && (
+        <div role="alert">
+          <p>Please fix the following errors:</p>
+          {<ul>
+            {Object.keys(errors).map((key) => {
+              return <li key={key}>{errors[key]}</li>;
+            })}
+          </ul> }
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="city">City</label>
@@ -73,11 +125,11 @@ export default function Checkout({ cart, emptyCart }) {
             id="city"
             type="text"
             value={address.city}
-            onBlur={handleBlur}
-            onChange={handleChange}
+            onBlur={handleBlurInput}
+            onChange={handleChangeInput}
           />
           <p role="alert">
-            {(touched || status === STATUS.SUBMITTED) && errors.city}
+            {(touched.city || status === STATUS.SUBMITTED) && errors.city}
           </p>
         </div>
 
@@ -95,10 +147,11 @@ export default function Checkout({ cart, emptyCart }) {
             <option value="India">India</option>
             <option value="United Kingdom">United Kingdom</option>
             <option value="USA">USA</option>
+            <option value="Peru">Peru</option>
           </select>
 
           <p role="alert">
-            {(touched || status === STATUS.SUBMITTED) && errors.country}
+            {(touched.country || status === STATUS.SUBMITTED) && errors.country}
           </p>
         </div>
 

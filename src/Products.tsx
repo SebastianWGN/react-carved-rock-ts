@@ -9,18 +9,33 @@ interface ParamTypes {
     category: string
   }
 
+interface Product{
+  id:number
+  name:string
+  price:number
+  image:string
+  category:string
+  description:string
+  skus: Array<Sku>
+}
+  
+export interface Sku{
+  sku:string
+  size: number
+}
+  
 export default function Products() {
   const [size, setSize] = useState("");
-  const params = useParams();
-
+  const { category } = useParams();
+  
   const { data: products, loading, error } = useFetch(
-    "products?category=" + params.category
+    "products?category=" + category
   );
-
-  function renderProduct(p) {
+  
+  function renderProduct(p: Product) {
     return (
       <div key={p.id} className="product">
-        <Link to={`/${params.category}/${p.id}`}>
+        <Link to={`/${category}/${p.id}`}>
           <img src={`/images/${p.image}`} alt={p.name} />
           <h3>{p.name}</h3>
           <p>${p.price}</p>
@@ -28,15 +43,15 @@ export default function Products() {
       </div>
     );
   }
-
+  
   const filteredProducts = size
-    ? products.filter((p) => p.skus.find((s) => s.size === parseInt(size)))
+    ? products.filter((p: Product) => p.skus.find((s) => s.size === parseInt(size)))
     : products;
-
+  
   if (error) throw error;
   if (loading) return <Spinner />;
   if (products.length === 0) return <PageNotFound />;
-
+  
   return (
     <>
       <section id="filters">

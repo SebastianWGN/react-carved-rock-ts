@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-export default function useFetchAll(urls) {
+export default function useFetchAll(urls:any) {
   const prevUrls = useRef([]);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +14,7 @@ export default function useFetchAll(urls) {
     }
     prevUrls.current = urls;
 
-    const promises = urls.map((url) =>
+    const promises = urls.map((url:string) =>
       fetch(process.env.REACT_APP_API_BASE_URL + url).then((response) => {
         if (response.ok) return response.json();
         throw response;
@@ -33,9 +33,9 @@ export default function useFetchAll(urls) {
   return { data, loading, error };
 }
 
-function areEqual(array1, array2) {
+function areEqual(array1:any, array2:any) {
   return (
     array1.length === array2.length &&
-    array1.every((value, index) => value === array2[index])
+    array1.every((value:any, index:any) => value === array2[index])
   );
 }

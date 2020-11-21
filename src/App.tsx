@@ -8,6 +8,14 @@ import Detail from "./Detail";
 import Cart from "./Cart";
 import Checkout from "./Checkout";
 
+
+interface CartItm{
+  id: string
+  sku: string
+  quantity: number
+}
+
+
 export default function App() {
   const [cart, setCart] = useState(() => {
     try {
@@ -20,8 +28,8 @@ export default function App() {
 
   useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
 
-  function addToCart(id, sku) {
-    setCart((items) => {
+  function addToCart(id:number, sku:string) {
+    setCart((items:Array<CartItm>) => {
       const itemInCart = items.find((i) => i.sku === sku);
       if (itemInCart) {
         // Return new array with the matching item replaced
@@ -35,11 +43,11 @@ export default function App() {
     });
   }
 
-  function updateQuantity(sku, quantity) {
-    setCart((items) => {
+  function updateQuantity(sku:string, quantity:number) {
+    setCart((items:any) => {
       return quantity === 0
-        ? items.filter((i) => i.sku !== sku)
-        : items.map((i) => (i.sku === sku ? { ...i, quantity } : i));
+        ? items.filter((i:any) => i.sku !== sku)
+        : items.map((i:any) => (i.sku === sku ? { ...i, quantity } : i));
     });
   }
 
